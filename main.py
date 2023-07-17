@@ -1,5 +1,6 @@
 from logging import basicConfig
-from flask import Blueprint, render_template, flash, request, redirect, url_for, session
+import folium
+from flask import Blueprint, render_template, flash, request, redirect, url_for, session, abort
 from flask_login import login_required, current_user
 from __init__ import create_app, db
 import pickle
@@ -18,6 +19,7 @@ import re
 import urllib.request                                                                                      
 import os                                                                                           
 import subprocess 
+
 main = Blueprint('main', __name__)
 
 model = pickle.load(open('model.pkl', 'rb'))
@@ -167,7 +169,96 @@ def weather():
 def weather_new():
     return render_template('weather1.html')
     
+##############################################################################
+@main.route("/map")
+def map():
+    # this is base map
+    map = folium.Map(
+        location=[45.52336, -122.6750]
+    )
+    return map._repr_html_()
 
+@main.route("/open-street-map")
+def open_street_map():
+    # this map using stamen toner
+    map = folium.Map(
+        location=[45.52336, -122.6750],
+        tiles='Stamen Toner',
+        zoom_start=13
+    )
+
+    folium.Marker(
+        location=[45.52336, -122.6750],
+        popup="<b>Marker here</b>",
+        tooltip="Click Here!"
+    ).add_to(map)
+    
+    return map._repr_html_()
+
+@main.route("/map-marker")
+def map_marker():
+    # this map using stamen terrain
+    # we add some marker here
+    map = folium.Map(
+        location=[45.52336, -122.6750],
+        tiles='Stamen Terrain',
+        zoom_start=12
+    )
+
+    folium.Marker(
+        location=[45.52336, -122.6750],
+        popup="<b>Marker here</b>",
+        tooltip="Click Here!"
+    ).add_to(map)
+
+    folium.Marker(
+        location=[45.55736, -122.8750],
+        popup="<b>Marker 2 here</b>",
+        tooltip="Click Here!",
+        icon=folium.Icon(color='green')
+    ).add_to(map)
+
+    folium.Marker(
+        location=[45.53236, -122.8750],
+        popup="<b>Marker 3 here</b>",
+        tooltip="Click Here!",
+        icon=folium.Icon(color='red')
+    ).add_to(map)
+
+    return map._repr_html_()
+##########################################################
+# class area:
+#     def __init__(self, key, name, lat, lng):
+#         self.key  = key
+#         self.name = name
+#         self.lat  = lat
+#         self.lng  = lng
+# areas = (
+#     area('hv',      'Happy Valley Elementary',   37.9045286, -122.1445772),
+#     area('stanley', 'Stanley Middle',            37.8884474, -122.1155922),
+#     area('wci',     'Walnut Creek Intermediate', 37.9093673, -122.0580063)
+# )
+# areas_by_key = {area.key: area for area in areas}
+
+
+# @main.route("/map")
+# def map():
+#     return render_template('map1.html', area=areas)
+
+
+# @main.route("/map/<area_code>")
+# def show_rain(area_code):
+#     area= areas_by_key.get(area_code)
+#     if area:
+#         return render_template('map.html', area = area)
+#     else:
+#         abort(404)
+
+
+
+
+
+##############################################################################
 
 
 # /<int:post_id>
